@@ -24,6 +24,8 @@ class ProfileController < ApplicationController
 
   def get_user
     @user = User.find(params[:id])
+  rescue ActiveRecord::RecordNotFound
+    render json: { error: 'User not found' }, status: :not_found
   end
 
   def calc_stat
@@ -32,13 +34,13 @@ class ProfileController < ApplicationController
     {
       matches: @participations.count,
       victories: victories,
-      with_murder: @games.count { |game| !game.murdered_id.nil? },
+      withMurder: @games.count { |game| !game.murdered_id.nil? },
       evil: @participations.count { |p| p.evil?},
-      evil_victories: evil_victories,
-      merlin_murders: merlin_murders,
+      evilVictories: evil_victories,
+      merlinMurders: merlin_murders,
       goodness: @participations.count { |p| p.good? },
-      goodness_victories: goodness_victories,
-      merlin_imitations: merlin_imitations,
+      goodnessVictories: goodness_victories,
+      merlinImitations: merlin_imitations,
     }
   end
 

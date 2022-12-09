@@ -9,14 +9,12 @@ class ProfileController < ApplicationController
     render json: calc_stat
   end
 
-  def matches_history
+  def games_history
     per_page = (params[:per_page] || 5).to_i
     page = (params[:page] || 1).to_i
     game_ids = @user.participations.map &:game_id
     games = Game.where(id: game_ids).page(page, per_page)
-    result = games.map do |game|
-      game.serializable_hash.merge({ role: Participation.find_by(user_id: @user.id, game_id: game.id).role })
-    end
+    result = games.map {|game| calc_game_history game }
     render json: result, except: [:updated_at]
   end
 
@@ -26,6 +24,22 @@ class ProfileController < ApplicationController
     @user = User.find(params[:id])
   rescue ActiveRecord::RecordNotFound
     render json: { error: 'User not found' }, status: :not_found
+  end
+
+  def calc_game_history(game)
+    participation = Participation.find_by(user_id: @user.id, game_id: game.id)
+    {
+      id: game.id,
+      role: participation.role,
+      result: game.evil_won? == participation.evil? ? 'win':'loss',
+      mission1: game.mission_1,
+      mission2: game.mission_2,
+      mission3: game.mission_3,
+      mission4: game.mission_4,
+      mission5: game.mission_5,
+      date: game.created_at.to_s[/\d\d\d\d-\d\d-\d\d/],
+      time: game.created_at.to_s[/\d\d:\d\d/]
+    }
   end
 
   def calc_stat

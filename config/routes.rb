@@ -5,5 +5,5 @@ Rails.application.routes.draw do
   # root "articles#index
   get 'user/:id', to: 'profile#account_info'
   get 'user/:id/stat', to: 'profile#stat'
-  get 'user/:id/history', to: 'profile#matches_history'
+  get 'user/:id/history', to: 'profile#games_history'
 end

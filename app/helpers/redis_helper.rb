@@ -18,7 +18,7 @@ module RedisHelper
   }
 
   def create_game_state(game_id, *players)
-    state_hash = Kredis.hash "#state{game_id}", typed: :integer
+    state_hash = Kredis.hash "state#{game_id}", typed: :integer
     state_hash.value = {
       state: GAME_STATE["Initial"],
       mission1: MISSION_STATE["2"],

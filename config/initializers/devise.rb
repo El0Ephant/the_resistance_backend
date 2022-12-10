@@ -10,15 +10,23 @@
 # Many of these configuration options can be set straight in your model.
 Devise.setup do |config|
 
+
   config.jwt do |jwt|
-    jwt.secret = Rails.application.credentials.devise[:jwt_secret_key]
+    jwt.secret = ENV['DEVISE_JWT_SECRET_KEY']
+    jwt.dispatch_requests = [
+      ['POST', %r{^/api/login$}]
+    ]
+    jwt.revocation_requests = [
+      ['DELETE', %r{^/api/logout$}]
+    ]
+    jwt.expiration_time = 1.day.to_i
   end
   # The secret key used by Devise. Devise uses this key to generate
   # random tokens. Changing this key will render invalid all existing
   # confirmation, reset password and unlock tokens in the database.
   # Devise will use the `secret_key_base` as its `secret_key`
   # by default. You can change it below and use your own secret key.
-  # config.secret_key = 'bd95bfd053fb09d559951c20dc22eab6029ee45423b7f1bc493cf6d03e3d0482a4c4ab5e05bacddf88bcc0592ea4f215c63db9fdb8651ad2948c6ee6c0ce5083'
+   config.secret_key = '32d78cfc261536ab7e03632bc7231ab601f3a17cbb9cc246d17a5541659c884f102e659682fc52b3fb33f3b8a4a9fa369ff87e179c46ebb7aa0b125de16bce70'
 
   # ==> Controller configuration
   # Configure the parent class to the devise controllers.

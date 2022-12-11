@@ -1,6 +1,6 @@
 class User < ApplicationRecord
-  #validates :nickname, :email, :password_digest, presence:  true
-  #validates :email, :login, uniqueness: true
+  validates :login, :email, :encrypted_password, presence: true
+  validates :login, :email, uniqueness: true
   has_many :participations
   has_many :games, through: :participations
   devise :database_authenticatable, :registerable,

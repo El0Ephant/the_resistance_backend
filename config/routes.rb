@@ -1,5 +1,6 @@
 Rails.application.routes.draw do
   devise_for :users,
+             defaults: { format: :json }, # to avoid "undefined local variable or method `flash' for"
              controllers: {
                sessions: 'users/sessions',
                registrations: 'users/registrations'

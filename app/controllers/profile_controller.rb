@@ -2,7 +2,7 @@ class ProfileController < ApplicationController
   before_action :get_user
 
   def account_info
-    render json: @user, only: [:nickname, :login, :email]
+    render json: @user, only: [:id, :nickname, :login]
   end
 
   def stat

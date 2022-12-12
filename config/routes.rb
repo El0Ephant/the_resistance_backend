@@ -1,16 +1,21 @@
 Rails.application.routes.draw do
-  devise_for :users,
-             defaults: { format: :json }, # to avoid "undefined local variable or method `flash' for"
-             controllers: {
-               sessions: 'users/sessions',
-               registrations: 'users/registrations'
-             }
-  get '/member-data', to: 'members#show'
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
+  scope 'api' do
+    devise_for :users,
+               defaults: { format: :json }, # to avoid "undefined local variable or method `flash' for"
+               path: '',
+               path_names: {
+                 sign_in: 'sign_in',
+                 sign_out: 'sign_out',
+                 registration: 'sign_up'
+               },
+               controllers: {
+                 sessions: 'users/sessions',
+                 registrations: 'users/registrations'
+               }
+    get 'member-data', to: 'members#show'
 
-  # Defines the root path route ("/")
-  # root "articles#index
-  get 'user/:id', to: 'profile#account_info'
-  get 'user/:id/stat', to: 'profile#stat'
-  get 'user/:id/history', to: 'profile#games_history'
+    get 'user/:id', to: 'profile#account_info'
+    get 'user/:id/stat', to: 'profile#stat'
+    get 'user/:id/history', to: 'profile#games_history'
+  end
 end

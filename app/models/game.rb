@@ -2,7 +2,8 @@ class Game < ApplicationRecord
   WINNERS = [:good, :evil]
 
   enum :winner, WINNERS
-  validates :winner, :mission_1, :mission_2, :mission_3, presence: true
+  validates :winner, presence: true
+  validates_inclusion_of :mission_1, :mission_2, :mission_3, in: [true, false]
   has_many :participations
   has_many :users, through: :participations
 

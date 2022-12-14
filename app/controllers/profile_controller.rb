@@ -1,5 +1,5 @@
 class ProfileController < MembersController
-
+  before_action :find_user
   def account_info
     render json: @user, only: [:id, :nickname, :login]
   end
@@ -18,6 +18,12 @@ class ProfileController < MembersController
   end
 
   private
+
+  def find_user
+    @user = User.find(params[:id])
+  rescue ActiveRecord::RecordNotFound
+    render json: { error: 'User not found' }, status: :not_found
+  end
 
   def calc_game_history(game)
     participation = Participation.find_by(user_id: @user.id, game_id: game.id)

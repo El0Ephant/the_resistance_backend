@@ -34,6 +34,14 @@ class Users::RegistrationsController < Devise::RegistrationsController
   end
 
   def register_failed
-    render json: { message: 'Something went wrong.' }, status: :unprocessable_entity
+    unless User.find_by(email: resource.email).nil?
+      render json: { message: 'Email is already taken' }, status: :unprocessable_entity
+      return
+    end
+    unless User.find_by(login: resource.login).nil?
+      render json: { message: 'Login is already taken' }, status: :unprocessable_entity
+      return
+    end
+    render json: { message: 'Something went wrong' }, status: :unprocessable_entity
   end
 end

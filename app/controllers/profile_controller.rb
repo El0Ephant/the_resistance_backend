@@ -1,4 +1,4 @@
-class ProfileController < MembersController
+class ProfileController < ApplicationController
   before_action :find_user
   def account_info
     render json: @user, only: [:id, :nickname, :login]

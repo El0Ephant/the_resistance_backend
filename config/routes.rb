@@ -14,6 +14,7 @@ Rails.application.routes.draw do
                }
     get 'member-data', to: 'members#show'
 
+    get 'user', to: 'profile#my_account_info'
     get 'user/:id', to: 'profile#account_info'
     get 'user/:id/stat', to: 'profile#stat'
     get 'user/:id/history', to: 'profile#games_history'

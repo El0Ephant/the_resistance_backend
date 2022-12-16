@@ -1,5 +1,9 @@
-class ProfileController < ApplicationController
-  before_action :find_user
+class ProfileController < MembersController
+  before_action :find_user, except: [:my_account_info]
+
+  def my_account_info
+    render json: @user, only: [:id, :nickname, :login, :email]
+  end
   def account_info
     render json: @user, only: [:id, :nickname, :login]
   end

@@ -12,8 +12,15 @@ class MembersController < ApplicationController
   private
 
   def get_user_from_token
+    begin
     jwt_payload = JWT.decode(request.headers['Authorization'].split(' ')[1],
                              ENV['DEVISE_JWT_SECRET_KEY']).first
+    rescue JWT::ExpiredSignature
+      render json: {
+        message: 'Token has expired'
+      }, status: 401
+      return
+    end
     user_id = jwt_payload['sub']
     @user = User.find(user_id.to_s)
   end

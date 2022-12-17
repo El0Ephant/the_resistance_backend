@@ -14,6 +14,7 @@ Rails.application.routes.draw do
                }
     get 'member-data', to: 'members#show'
 
+    patch 'user/set_nickname', to: 'profile#set_nickname'
     get 'user', to: 'profile#my_account_info'
     get 'user/:id', to: 'profile#account_info'
     get 'user/:id/stat', to: 'profile#stat'

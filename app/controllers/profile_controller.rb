@@ -1,9 +1,21 @@
 class ProfileController < MembersController
-  before_action :find_user, except: [:my_account_info]
+  before_action :find_user, except: [:my_account_info, :set_nickname]
 
+  def set_nickname
+    if params[:nickname].nil?
+      render json: {
+        message: 'Something went wrong'
+      }, status: 422
+      return
+    end
+    @user.nickname = params[:nickname]
+    @user.save
+    render json: @user, only: [:id, :nickname, :login, :email]
+  end
   def my_account_info
     render json: @user, only: [:id, :nickname, :login, :email]
   end
+
   def account_info
     render json: @user, only: [:id, :nickname, :login]
   end

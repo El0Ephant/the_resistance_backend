@@ -7,7 +7,7 @@ class RoomChannel < ApplicationCable::Channel
 
   def unsubscribed
   end
-
+  #@todo добавить реальные state вместо заглушек
   # lobby leader actions
   def hand_over_leadership(data)
     return unless have_permission?(state: "заполнение комнаты", user: @user)

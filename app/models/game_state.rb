@@ -18,7 +18,7 @@ class GameState
   field :votes_for_candidates, type: Hash, default: {}
   field :candidates, type: Array, default: []
 
-  field :votes_for_result, type: Array, default: []
+  field :votes_for_result, type: Hash, default: {}
   field :murdered_id, type: Integer
 
 end

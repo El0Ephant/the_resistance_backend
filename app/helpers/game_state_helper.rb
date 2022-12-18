@@ -179,7 +179,7 @@ module GameStateHelper
   def vote_for_result(game_id, player_id, vote)
     game_state = GameState.find(game_id)
     if game_state.candidates.include?(player_id)
-      game_state.votes_for_result << vote
+      game_state.votes_for_result[player_id] = vote
     end
     if game_state.votes_for_result.size == game_state.candidates.size
       game_state.state = State::VOTE_FOR_RESULT_REVEALED
@@ -214,7 +214,7 @@ module GameStateHelper
     game_state.state = State::PICK_CANDIDATES
     game_state.candidates = []
     game_state.votes_for_candidates = {}
-    game_state.votes_for_result = []
+    game_state.votes_for_result = {}
     game_state.save
     create_hash(game_state)
   end
@@ -253,7 +253,7 @@ module GameStateHelper
       current_vote: game_state.current_vote,
       votes_for_candidates: game_state.votes_for_candidates,
       candidates: game_state.acandidates,
-      votes_for_result: game_state.votes_for_result.shuffle,
+      votes_for_result: game_state.votes_for_result.values.shuffle,
       murdered_id: game_state.murdered_id,
     }
   end

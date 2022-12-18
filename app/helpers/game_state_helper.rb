@@ -256,7 +256,7 @@ module GameStateHelper
       leader_id: game_state.leader_id,
       current_vote: game_state.current_vote,
       votes_for_candidates: game_state.votes_for_candidates,
-      candidates: game_state.acandidates,
+      candidates: game_state.candidates,
       votes_for_result: game_state.votes_for_result.values.shuffle,
       murdered_id: game_state.murdered_id,
     }

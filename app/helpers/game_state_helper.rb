@@ -1,16 +1,16 @@
 module GameStateHelper
   module State
-    WAITING = "Waiting"
-    PICK_CANDIDATES = "PickCandidates"
-    VOTE_FOR_CANDIDATES = "VoteForCandidates"
-    VOTE_FOR_CANDIDATES_REVEALED = "VoteForCandidatesRevealed"
-    VOTE_FOR_RESULT = "VoteForResult"
-    VOTE_FOR_RESULT_REVEALED = "VoteForResultRevealed"
+    WAITING = "waiting"
+    PICK_CANDIDATES = "pickCandidates"
+    VOTE_FOR_CANDIDATES = "voteForCandidates"
+    VOTE_FOR_CANDIDATES_REVEALED = "voteForCandidatesRevealed"
+    VOTE_FOR_RESULT = "voteForResult"
+    VOTE_FOR_RESULT_REVEALED = "voteForResultRevealed"
 
-    PICK_PLAYER_FOR_MURDER = "PickPlayerForMurder"
+    PICK_PLAYER_FOR_MURDER = "pickPlayerForMurder"
 
-    BAD_FINAL = "BadFinal"
-    GOOD_FINAL = "GoodFinal"
+    BAD_FINAL = "badFinal"
+    GOOD_FINAL = "goodFinal"
   end
 
   module Role
@@ -247,9 +247,9 @@ module GameStateHelper
 
   def create_hash(game_state)
     {
+      runtimeType: game_state.state,
       adminId: game_state.admin_id,
       playerCount: game_state.player_count,
-      state: game_state.state,
       players: game_state.players,
       missions: game_state.missions,
       currentMission: game_state.current_mission,

@@ -50,7 +50,7 @@ class RoomChannel < ApplicationCable::Channel
     ActionCable.server.broadcast(@room_name, Helper::vote_for_mission(from: @user, choice: data["choice"]))
   end
 
-  def select_result(data)
+  def vote_for_result(data)
     return unless have_permission?(state: "поход", user: @user)
     ActionCable.server.broadcast(@room_name, Helper::select_result(from: @user, choice: data["result"]))
   end
@@ -65,12 +65,12 @@ class RoomChannel < ApplicationCable::Channel
     ActionCable.server.broadcast(@room_name, Helper::confirm_lol)
   end
 
-  def pick_player_for_kill(data)
+  def pick_player_for_murder(data)
     return unless have_permission?(state: "Убийство", user: @user)
     ActionCable.server.broadcast(@room_name, Helper::pick_player_for_kill(data["player"]))
   end
 
-  def confirm_kill
+  def confirm_murder
     return unless have_permission?(state: "Убийство", user: @user)
     ActionCable.server.broadcast(@room_name, Helper::confirm_kill)
   end

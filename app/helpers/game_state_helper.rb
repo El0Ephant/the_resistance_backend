@@ -187,7 +187,7 @@ module GameStateHelper
     end
     if game_state.votes_for_result.size == game_state.candidates.size
       game_state.state = State::VOTE_FOR_RESULT_REVEALED
-      game_state.missions[game_state.current_mission] = game_state.votes_for_result.all? ?
+      game_state.missions[game_state.current_mission] = game_state.votes_for_result.values.all? ?
                                                           Mission::WIN
                                                           :
                                                           Mission::LOOSE

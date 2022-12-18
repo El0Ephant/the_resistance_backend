@@ -60,6 +60,10 @@ module GameStateHelper
     GameState.find(game_id).delete
   end
 
+  def is_here?(game_id, user_id)
+    game_state = GameState.find(game_id)
+    game_state.players.include?(user_id)
+  end
   def is_admin?(game_id, user_id)
     game_state = GameState.find(game_id)
     game_state.admin_id == user_id

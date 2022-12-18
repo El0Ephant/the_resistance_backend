@@ -64,10 +64,13 @@ module GameStateHelper
     game_state = GameState.find(game_id)
     game_state.admin_id == user_id
   end
-
-  def right_role?(game_id, user_id, role)
+  def is_leader?(game_id, user_id)
     game_state = GameState.find(game_id)
-    game_state.player_roles[user_id.to_s] == role
+    game_state.leader_id == user_id
+  end
+  def right_role?(game_id, user_id, *roles)
+    game_state = GameState.find(game_id)
+    roles.include?(game_state.player_roles[user_id.to_s])
   end
 
   def right_state?(game_id, state)
@@ -81,6 +84,7 @@ module GameStateHelper
     players = game_state.players
     roles = game_state.roles
     game_state.players_roles = players.zip(roles.shuffle).to_h
+    game_state.leader_id = game_state.admin_id
     game_state.save
     create_hash(game_state)
   end

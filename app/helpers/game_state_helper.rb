@@ -4,8 +4,8 @@ module GameStateHelper
     PICK_CANDIDATES = "PickCandidates"
     VOTE_FOR_CANDIDATES = "VoteForCandidates"
     VOTE_FOR_CANDIDATES_REVEALED = "VoteForCandidatesRevealed"
-    VOTE_FOR_RESULT = "VOTE_FOR_RESULT"
-    VOTE_FOR_RESULT_REVEALED = "VOTE_FOR_RESULT_REVEALED"
+    VOTE_FOR_RESULT = "VoteForResult"
+    VOTE_FOR_RESULT_REVEALED = "VoteForResultRevealed"
 
     PICK_PLAYER_FOR_MURDER = "PickPlayerForMurder"
 

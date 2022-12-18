@@ -247,18 +247,18 @@ module GameStateHelper
 
   def create_hash(game_state)
     {
-      admin_id: game_state.admin_id,
-      player_count: game_state.player_count,
+      adminId: game_state.admin_id,
+      playerCount: game_state.player_count,
       state: game_state.state,
       players: game_state.players,
       missions: game_state.missions,
-      current_mission: game_state.current_mission,
-      leader_id: game_state.leader_id,
-      current_vote: game_state.current_vote,
-      votes_for_candidates: game_state.votes_for_candidates,
+      currentMission: game_state.current_mission,
+      leaderId: game_state.leader_id,
+      currentVote: game_state.current_vote,
+      votesForCandidates: game_state.votes_for_candidates,
       candidates: game_state.candidates,
-      votes_for_result: game_state.votes_for_result.values.shuffle,
-      murdered_id: game_state.murdered_id,
+      votesForResult: game_state.votes_for_result.values.shuffle,
+      murderedId: game_state.murdered_id,
     }
   end
 end

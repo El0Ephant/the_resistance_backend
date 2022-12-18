@@ -76,13 +76,6 @@ module GameStateHelper
     create_hash(game_state)
   end
 
-  def hand_over_leadership(game_id, new_admin_id)
-    game_state = GameState.find(game_id)
-    game_state.admin_id = new_admin_id
-    game_state.save
-    create_hash(game_state)
-  end
-
   def start_game(game_id, player_id)
     game_state = GameState.find(game_id)
     players = game_state.players
@@ -102,6 +95,14 @@ module GameStateHelper
   def free_up_seat(game_id, player_id)
     game_state = GameState.find(game_id)
     game_state.players.delete(player_id)
+    game_state.save
+    create_hash(game_state)
+  end
+
+  def hand_over_leadership(game_id)
+    game_state = GameState.find(game_id)
+    players = game_state.players
+    game_state.leader_id = players.sample
     game_state.save
     create_hash(game_state)
   end

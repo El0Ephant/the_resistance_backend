@@ -2,8 +2,7 @@ module ApplicationCable
   class Connection < ActionCable::Connection::Base
     identified_by :current_user
     def connect
-      self.current_user = "test_user"
-      #self.current_user = find_verified_user
+      self.current_user = find_verified_user
     end
     def find_verified_user
       # request.params[:token] or something like: request.headers['Authorization'].split(' ')[1]

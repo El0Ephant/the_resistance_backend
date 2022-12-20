@@ -83,12 +83,12 @@ module GameStateHelper
     create_hash(game_state)
   end
 
-  def start_game(game_id, player_id)
+  def start_game(game_id)
     game_state = GameState.find(game_id)
     players = game_state.players
     roles = game_state.roles
     game_state.players_roles = players.zip(roles.shuffle).to_h
-    game_state.leader_id = game_state.admin_id
+    game_state.leader_id = game_state.admin_id #должен быть случайный
     game_state.save
     create_hash(game_state)
   end
@@ -135,6 +135,7 @@ module GameStateHelper
       if game_state.current_vote == 5
         game_state.current_vote = 1
         game_state.state = State::VOTE_FOR_RESULT
+        game_state.save
         return create_hash(game_state)
       else
         game_state.state = State::VOTE_FOR_CANDIDATES
@@ -230,7 +231,7 @@ module GameStateHelper
     create_hash(game_state)
   end
 
-  def confirm_murder
+  def confirm_murder(game_id)
     game_state = GameState.find(game_id)
     if game_state.murdered_id != nil
       if game_state.player_roles[game_state.murdered_id.to_s] == Role::MERLIN

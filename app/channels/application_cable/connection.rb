@@ -5,7 +5,7 @@ module ApplicationCable
       self.current_user = find_verified_user
     end
     def find_verified_user
-      # request.params[:token] or something like: request.headers['Authorization'].split(' ')[1]
+      # request.params[:token] or something like: request.authorization.split(' ')[1]
       begin
         jwt_payload = JWT.decode(request.params[:token],
                                  ENV['DEVISE_JWT_SECRET_KEY']).first

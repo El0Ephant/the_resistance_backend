@@ -64,14 +64,17 @@ module GameStateHelper
     game_state = GameState.find(game_id)
     game_state.players.include?(user_id)
   end
+
   def is_admin?(game_id, user_id)
     game_state = GameState.find(game_id)
     game_state.admin_id == user_id
   end
+
   def is_leader?(game_id, user_id)
     game_state = GameState.find(game_id)
     game_state.leader_id == user_id
   end
+
   def right_role?(game_id, user_id, *roles)
     game_state = GameState.find(game_id)
     roles.include?(game_state.player_roles[user_id.to_s])
@@ -88,7 +91,7 @@ module GameStateHelper
     players = game_state.players
     roles = game_state.roles
     game_state.players_roles = players.zip(roles.shuffle).to_h
-    game_state.leader_id = game_state.admin_id #должен быть случайный
+    game_state.leader_id = game_state.players.sample
     game_state.save
     create_hash(game_state)
   end
@@ -147,21 +150,20 @@ module GameStateHelper
 
   def vote_for_candidates(game_id, player_id, vote)
     game_state = GameState.find(game_id)
-    game_state.votes_for_candidates[player_id.to_s] = vote
-    if game_state.votes_for_candidates.size == game_state.players_count
-      game_state.state = State::VOTE_FOR_CANDIDATES_REVEALED
+    GameState.with_session do |s|
+      s.start_transaction
+      game_state.votes_for_candidates[player_id.to_s] = vote
+      if game_state.votes_for_candidates.size == game_state.players_count
+        game_state.state = State::VOTE_FOR_CANDIDATES_REVEALED
+      end
+      game_state.save
+      s.commit_transaction
     end
-    game_state.save
     create_hash(game_state)
   end
 
   def after_vote(game_id)
     game_state = GameState.find(game_id)
-    if game_state.current_vote == 5
-      game_state.state = State::VOTE_FOR_RESULT
-      game_state.save
-      return create_hash(game_state)
-    end
 
     result = 0
     game_state.votes_for_candidates.values.each do |value|
@@ -183,17 +185,22 @@ module GameStateHelper
 
   def vote_for_result(game_id, player_id, vote)
     game_state = GameState.find(game_id)
-    if game_state.candidates.include?(player_id)
-      game_state.votes_for_result[player_id] = vote
+    GameState.with_session do |s|
+      s.start_transaction
+
+      if game_state.candidates.include?(player_id)
+        game_state.votes_for_result[player_id] = vote
+      end
+      if game_state.votes_for_result.size == game_state.candidates.size
+        game_state.state = State::VOTE_FOR_RESULT_REVEALED
+        game_state.missions[game_state.current_mission] = game_state.votes_for_result.values.all? ?
+                                                            Mission::WIN
+                                                            :
+                                                            Mission::LOOSE
+      end
+      game_state.save
+      s.commit_transaction
     end
-    if game_state.votes_for_result.size == game_state.candidates.size
-      game_state.state = State::VOTE_FOR_RESULT_REVEALED
-      game_state.missions[game_state.current_mission] = game_state.votes_for_result.values.all? ?
-                                                          Mission::WIN
-                                                          :
-                                                          Mission::LOOSE
-    end
-    game_state.save
     create_hash(game_state)
   end
 
@@ -220,6 +227,7 @@ module GameStateHelper
     game_state.candidates = []
     game_state.votes_for_candidates = {}
     game_state.votes_for_result = {}
+    game_state.leader_id = game_state.players.sample
     game_state.save
     create_hash(game_state)
   end

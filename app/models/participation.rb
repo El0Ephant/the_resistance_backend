@@ -1,6 +1,6 @@
 class Participation < ApplicationRecord
-  GOOD_ROLES = [:merlin, :percival, :good_knight]
-  EVIL_ROLES = [:mordred, :oberon, :assasin, :morgana, :evil_knight]
+  GOOD_ROLES = [:Merlin, :Percival, :Loyal]
+  EVIL_ROLES = [:Mordred, :Oberon, :Assassin, :Morgana, :Evil]
 
   enum :role, GOOD_ROLES + EVIL_ROLES
   validates :user_id, :game_id, :role, presence: true

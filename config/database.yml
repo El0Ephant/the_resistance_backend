@@ -87,4 +87,4 @@ production:
   <<: *default
   database: the_resistance_production
   username: the_resistance
-  password: <%= ENV["THE_RESISTANCE_DATABASE_PASSWORD"] %>
+  password: <%= ENV["DATABASE_URL"] %>

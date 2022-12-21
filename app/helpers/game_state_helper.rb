@@ -239,6 +239,13 @@ module GameStateHelper
     create_hash(game_state)
   end
 
+  def unpick_player_for_murder(game_id, player_id)
+    game_state = GameState.find(game_id)
+    game_state.murdered_id = nil
+    game_state.save
+    create_hash(game_state)
+  end
+
   def confirm_murder(game_id)
     game_state = GameState.find(game_id)
     if game_state.murdered_id != nil

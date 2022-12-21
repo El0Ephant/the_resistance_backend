@@ -5,11 +5,12 @@ class RoomChannel < ApplicationCable::Channel
     @room_id = params[:room_id]
     @room_name = "room_#{@room_id}"
     stream_from @room_name
-    @timeout = 5
+    @timeout = 2
   end
 
   def unsubscribed
   end
+
   # lobby leader actions
   def hand_over_leadership(data)
     return unless have_admin_permission?(GameStateHelper::State::WAITING)
@@ -87,12 +88,15 @@ class RoomChannel < ApplicationCable::Channel
     return unless have_permission?(GameStateHelper::State::PICK_PLAYER_FOR_MURDER, GameStateHelper::Role::ASSASSIN)
     ActionCable.server.broadcast(@room_name, GameStateHelper::pick_player_for_murder(@room_id, data["player"]))
   end
+  def unpick_player_for_murder(data)
+    return unless have_permission?(GameStateHelper::State::PICK_PLAYER_FOR_MURDER, GameStateHelper::Role::ASSASSIN)
+    ActionCable.server.broadcast(@room_name, GameStateHelper::unpick_player_for_murder(@room_id, data["player"]))
+  end
 
   def confirm_murder
     return unless have_permission?(GameStateHelper::State::PICK_PLAYER_FOR_MURDER, GameStateHelper::Role::ASSASSIN)
     ActionCable.server.broadcast(@room_name, GameStateHelper::confirm_murder(@room_id))
   end
-
 
   private
   def have_permission?(state, role)

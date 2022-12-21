@@ -24,6 +24,9 @@ module GameStateHelper
     MORGANA = "Morgana"
     MORDRED = "Mordred"
     OBERON = "Oberon"
+
+    UNKNOWN_LOYAL = "unknownLoyal"
+    UNKNOWN_EVIL = "unknownEvil"
   end
 
   module Mission
@@ -255,6 +258,47 @@ module GameStateHelper
     end
     game_state.save
     create_hash(game_state)
+  end
+
+  def get_roles(game_id, player_id)
+    game_state = GameState.find(game_id)
+    players = game_state.players
+    players.each do |x|
+      res[x] = {Name: User.find(x).nickname}
+    end
+    return res if game_state.state == State::WAITING
+
+    if game_state.state == State::BAD_FINAL || State::GOOD_FINAL
+      players.each do |x|
+        res[x][:Role] = pl_roles[x]
+      end
+      return res
+    end
+
+    pl_roles = game_state.players_roles
+    res[player_id][:Role] = pl_roles[player_id]
+
+    case pl_roles[player_id]
+    when MERLIN
+      pl_roles.each do |key, value|
+        if [ASSASSIN, MORGANA, MORDRED, EVIL].include? value
+          res[key][:Role] = UNKNOWN_EVIL
+        end
+      end
+    when PERCIVAL
+      pl_roles.each do |key, value|
+        if [MERLIN, MORGANA].include? value
+          res[key][:Role] = UNKNOWN_LOYAL
+        end
+      end
+    when ASSASSIN, MORGANA, MORDRED, EVIL
+      pl_roles.except[player_id].each do |key, value|
+        if [ASSASSIN, MORGANA, MORDRED, EVIL].include? value
+          res[key][:Role] = value
+        end
+      end
+    else
+    end
   end
 
   #private

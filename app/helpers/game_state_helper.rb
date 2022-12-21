@@ -268,7 +268,7 @@ module GameStateHelper
     end
     return res if game_state.state == State::WAITING
 
-    if game_state.state == State::BAD_FINAL || State::GOOD_FINAL
+    if game_state.state == State::BAD_FINAL || game_state.state == State::GOOD_FINAL
       players.each do |x|
         res[x][:Role] = pl_roles[x]
       end

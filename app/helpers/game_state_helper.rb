@@ -281,7 +281,7 @@ module GameStateHelper
     case pl_roles[player_id]
     when MERLIN
       pl_roles.each do |key, value|
-        if [ASSASSIN, MORGANA, MORDRED, EVIL].include? value
+        if [ASSASSIN, MORGANA, OBERON, EVIL].include? value
           res[key][:Role] = UNKNOWN_EVIL
         end
       end
@@ -293,7 +293,7 @@ module GameStateHelper
       end
     when ASSASSIN, MORGANA, MORDRED, EVIL
       pl_roles.except[player_id].each do |key, value|
-        if [ASSASSIN, MORGANA, MORDRED, EVIL].include? value
+        if [ASSASSIN, MORGANA, MORDRED, OBERON, EVIL].include? value
           res[key][:Role] = value
         end
       end

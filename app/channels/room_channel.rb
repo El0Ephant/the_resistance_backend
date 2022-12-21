@@ -11,10 +11,10 @@ class RoomChannel < ApplicationCable::Channel
   def unsubscribed
   end
 
-  # lobby leader actions
-  def hand_over_leadership(data)
+  # lobby admin actions
+  def hand_over_adminship(data)
     return unless have_admin_permission?(GameStateHelper::State::WAITING)
-    ActionCable.server.broadcast(@room_name, GameStateHelper::hand_over_leadership(data["player"]))
+    ActionCable.server.broadcast(@room_name, GameStateHelper::hand_over_adminship(data["player"]))
   end
 
   def kick_player(data)

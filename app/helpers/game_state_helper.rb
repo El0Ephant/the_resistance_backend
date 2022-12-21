@@ -294,7 +294,7 @@ module GameStateHelper
     when ASSASSIN, MORGANA, MORDRED, EVIL
       pl_roles.except[player_id].each do |key, value|
         if [ASSASSIN, MORGANA, MORDRED, OBERON, EVIL].include? value
-          res[key][:Role] = value
+          res[key][:Role] = UNKNOWN_EVIL
         end
       end
     else

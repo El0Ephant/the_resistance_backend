@@ -110,11 +110,9 @@ module GameStateHelper
     create_hash(game_state)
   end
 
-  def hand_over_leadership(game_id)
+  def hand_over_adminship(game_id, player_id)
     game_state = GameState.find(game_id)
-    players = game_state.players
-    game_state.leader_id = players.sample
-    game_state.save
+    game_state.admin_id = player_id
     create_hash(game_state)
   end
 

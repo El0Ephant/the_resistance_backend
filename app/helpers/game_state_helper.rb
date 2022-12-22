@@ -39,7 +39,7 @@ module GameStateHelper
     LOOSE = "Loose"
   end
 
-  def create_game(player_count, roles)
+  def self.create_game(player_count, roles)
     max_id = GameState.max(:_id).nil? ? 0 : GameState.max(:_id)
     game_id = (1..max_id + 1).to_a.find_index { |x| GameState.find(x).nil? } + 1
 
@@ -63,37 +63,37 @@ module GameStateHelper
     game_id
   end
 
-  def delete_game(game_id)
+  def self.delete_game(game_id)
     GameState.find(game_id).delete
   end
 
-  def is_here?(game_id, user_id)
+  def self.is_here?(game_id, user_id)
     game_state = GameState.find(game_id)
     game_state.players.include?(user_id)
   end
 
-  def is_admin?(game_id, user_id)
+  def self.is_admin?(game_id, user_id)
     game_state = GameState.find(game_id)
     game_state.admin_id == user_id
   end
 
-  def is_leader?(game_id, user_id)
+  def self.is_leader?(game_id, user_id)
     game_state = GameState.find(game_id)
     game_state.leader_id == user_id
   end
 
-  def right_role?(game_id, user_id, *roles)
+  def self.right_role?(game_id, user_id, *roles)
     game_state = GameState.find(game_id)
     roles.include?(game_state.player_roles[user_id.to_s])
   end
 
-  def right_state?(game_id, state)
+  def self.right_state?(game_id, state)
     game_state = GameState.find(game_id)
     game_state.state == state
     create_hash(game_state)
   end
 
-  def start_game(game_id)
+  def self.start_game(game_id)
     game_state = GameState.find(game_id)
     players = game_state.players
     roles = game_state.roles
@@ -103,41 +103,41 @@ module GameStateHelper
     create_hash(game_state)
   end
 
-  def take_seat(game_id, player_id)
+  def self.take_seat(game_id, player_id)
     game_state = GameState.find(game_id)
     game_state.players << player_id
     game_state.save
     create_hash(game_state)
   end
 
-  def free_up_seat(game_id, player_id)
+  def self.free_up_seat(game_id, player_id)
     game_state = GameState.find(game_id)
     game_state.players.delete(player_id)
     game_state.save
     create_hash(game_state)
   end
 
-  def hand_over_adminship(game_id, player_id)
+  def self.hand_over_adminship(game_id, player_id)
     game_state = GameState.find(game_id)
     game_state.admin_id = player_id
     create_hash(game_state)
   end
 
-  def pick_player_for_mission(game_id, player_id)
+  def self.pick_player_for_mission(game_id, player_id)
     game_state = GameState.find(game_id)
     game_state.candidates << player_id
     game_state.save
     create_hash(game_state)
   end
 
-  def unpick_player_for_mission(game_id, player_id)
+  def self.unpick_player_for_mission(game_id, player_id)
     game_state = GameState.find(game_id)
     game_state.candidates.delete(player_id)
     game_state.save
     create_hash(game_state)
   end
 
-  def confirm_team(game_id)
+  def self.confirm_team(game_id)
     game_state = GameState.find(game_id)
     if game_state.missions[game_state.current_mission] == game_state.candidates.size
       if game_state.current_vote == 5
@@ -153,7 +153,7 @@ module GameStateHelper
     create_hash(game_state)
   end
 
-  def vote_for_candidates(game_id, player_id, vote)
+  def self.vote_for_candidates(game_id, player_id, vote)
     game_state = GameState.find(game_id)
     GameState.with_session do |s|
       s.start_transaction
@@ -167,7 +167,7 @@ module GameStateHelper
     create_hash(game_state)
   end
 
-  def after_vote(game_id)
+  def self.after_vote(game_id)
     game_state = GameState.find(game_id)
 
     result = 0
@@ -188,7 +188,7 @@ module GameStateHelper
     create_hash(game_state)
   end
 
-  def vote_for_result(game_id, player_id, vote)
+  def self.vote_for_result(game_id, player_id, vote)
     game_state = GameState.find(game_id)
     GameState.with_session do |s|
       s.start_transaction
@@ -209,7 +209,7 @@ module GameStateHelper
     create_hash(game_state)
   end
 
-  def end_step(game_id)
+  def self.end_step(game_id)
     game_state = GameState.find(game_id)
 
     missions = game_state.missions
@@ -237,21 +237,21 @@ module GameStateHelper
     create_hash(game_state)
   end
 
-  def pick_player_for_murder(game_id, player_id)
+  def self.pick_player_for_murder(game_id, player_id)
     game_state = GameState.find(game_id)
     game_state.murdered_id = player_id
     game_state.save
     create_hash(game_state)
   end
 
-  def unpick_player_for_murder(game_id, player_id)
+  def self.unpick_player_for_murder(game_id, player_id)
     game_state = GameState.find(game_id)
     game_state.murdered_id = nil
     game_state.save
     create_hash(game_state)
   end
 
-  def confirm_murder(game_id)
+  def self.confirm_murder(game_id)
     game_state = GameState.find(game_id)
     if game_state.murdered_id != nil
       if game_state.player_roles[game_state.murdered_id.to_s] == Role::MERLIN
@@ -264,7 +264,7 @@ module GameStateHelper
     create_hash(game_state)
   end
 
-  def get_roles(game_id, player_id)
+  def self.get_roles(game_id, player_id)
     game_state = GameState.find(game_id)
     players = game_state.players
     players.each do |x|

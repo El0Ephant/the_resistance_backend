@@ -187,10 +187,10 @@ test:
 production:
   clients:
     default:
-      host: <%= ENV['MONGOID_HOST'] %>
-      port: <%= ENV['MONGOID_PORT'] %>
+      database: <%= ENV['MONGOID_DATABASE'] %>
+        host: <%= ENV['MONGOID_HOST'] %>
+        port: <%= ENV['MONGOID_PORT'] %>
       username: <%= ENV['MONGOID_USERNAME'] %>
       password: <%= ENV['MONGOID_PASSWORD'] %>
-      database: <%= ENV['MONGOID_DATABASE'] %>
       options:
         raise_not_found_error: false

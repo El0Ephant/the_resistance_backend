@@ -93,7 +93,7 @@ development:
         # not belong to this replica set will be ignored.
         # replica_set: name
 
-        # Whether to connect to the servers via ssl. (default: false)
+        # Whether to connect to the servers via ssl. (default: false)01
         # ssl: true
 
         # The certificate file used to identify the connection against MongoDB.

@@ -1,7 +1,6 @@
 class GameState
   include Mongoid::Document
   field :_id, type: Integer
-
   field :admin_id, type: Integer
   field :player_count, type: Integer
   field :state, type: String, default: GameStateHelper::State::WAITING

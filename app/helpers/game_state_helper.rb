@@ -306,6 +306,7 @@ module GameStateHelper
   def create_hash(game_state)
     {
       runtimeType: game_state.state,
+      gameId: game_state.id,
       adminId: game_state.admin_id,
       playerCount: game_state.player_count,
       players: game_state.players,

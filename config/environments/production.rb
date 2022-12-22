@@ -85,5 +85,5 @@ Rails.application.configure do
   config.active_record.dump_schema_after_migration = false
 
   config.action_cable.disable_request_forgery_protection = true
-  config.web_socket_server_url = "wss://.../cable"
+  config.web_socket_server_url = "ws://the-resistance-backend.onrender.com/cable"
 end

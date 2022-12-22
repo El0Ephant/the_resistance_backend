@@ -10,9 +10,6 @@ class RoomChannel < ApplicationCable::Channel
 
   def unsubscribed
   end
-  # def create_game(data)
-  #   ActionCable.server.broadcast(@room_name, GameStateHelper::create_game(@room_id, data["player_count"], data["roles"]))
-  # end
 
   # lobby admin actions
   def hand_over_adminship(data)
@@ -126,13 +123,8 @@ ws://localhost:3000/cable
 {
   "identifier": "{\"channel\":\"RoomChannel\", \"room_id\":77}",
   "command": "message",
-  "data": "{\"action\":\"speak\",\"body\":\"hello!\"}"
+  "data": "{\"action\":\"test\",\"body\":\"hello!\"}"
 }
 
-{
-  "identifier": "{\"channel\":\"RoomChannel\", \"room_id\":77}",
-  "command": "message",
-  "data": "{\"action\":\"vote\",\"body\":\"hello!\"}"
-}
 =end
 

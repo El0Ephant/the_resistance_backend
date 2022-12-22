@@ -188,8 +188,8 @@ production:
   clients:
     default:
       database: <%= ENV['MONGOID_DATABASE'] %>
-        host: <%= ENV['MONGOID_HOST'] %>
-        port: <%= ENV['MONGOID_PORT'] %>
+        hosts:
+          - <%= ENV['MONGOID_PORT'] %>:<%= ENV['MONGOID_HOST'] %>
       username: <%= ENV['MONGOID_USERNAME'] %>
       password: <%= ENV['MONGOID_PASSWORD'] %>
       options:

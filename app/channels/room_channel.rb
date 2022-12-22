@@ -29,12 +29,12 @@ class RoomChannel < ApplicationCable::Channel
 
   # other actions
   def take_seat
-    return if is_here?(@room_id, @player_id)
+    return if GameStateHelper::is_here?(@room_id, @player_id)
     ActionCable.server.broadcast(@room_name,GameStateHelper::take_seat(@room_id, @player_id))
   end
 
   def free_up_seat
-    return unless is_here?(@room_id, @player_id)
+    return unless GameStateHelper::is_here?(@room_id, @player_id)
     ActionCable.server.broadcast(@room_name, GameStateHelper::free_up_seat(@room_id, @player_id))
   end
 
@@ -55,7 +55,7 @@ class RoomChannel < ApplicationCable::Channel
   end
 
   def vote_for_candidates(data)
-    return unless right_state?(@room_id, GameStateHelper::State::VOTE_FOR_CANDIDATES)
+    return unless GameStateHelper::right_state?(@room_id, GameStateHelper::State::VOTE_FOR_CANDIDATES)
     st = GameStateHelper::vote_for_candidates(@room_id, @player_id, data["choice"])
     ActionCable.server.broadcast(@room_name, st)
     return unless st["state"] == State::VOTE_FOR_CANDIDATES_REVEALED
@@ -65,7 +65,7 @@ class RoomChannel < ApplicationCable::Channel
   end
 
   def vote_for_result(data)
-    return unless right_state?(@room_id, GameStateHelper::State::VOTE_FOR_RESULT)
+    return unless GameStateHelper::right_state?(@room_id, GameStateHelper::State::VOTE_FOR_RESULT)
     st = GameStateHelper::vote_for_result(@room_id, @player_id, data["result"])
     ActionCable.server.broadcast(@room_name, st)
     return unless st["state"] == State::VOTE_FOR_RESULT_REVEALED
@@ -100,15 +100,15 @@ class RoomChannel < ApplicationCable::Channel
 
   private
   def have_permission?(state, role)
-    right_state?(@room_id, state) && right_role?(@room_id, @player_id, role)
+    GameStateHelper::right_state?(@room_id, state) && GameStateHelper::right_role?(@room_id, @player_id, role)
   end
 
   def have_admin_permission?(state)
-    right_state?(@room_id, state) && is_admin?(@room_id, @player_id)
+    GameStateHelper::right_state?(@room_id, state) && GameStateHelper::is_admin?(@room_id, @player_id)
   end
 
   def have_lobby_leader_permission?(state)
-    right_state?(@room_id, state) && is_leader?(@room_id, @player_id)
+    GameStateHelper::right_state?(@room_id, state) && GameStateHelper::is_leader?(@room_id, @player_id)
   end
 end
 

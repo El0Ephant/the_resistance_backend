@@ -40,7 +40,7 @@ module GameStateHelper
   end
 
   def create_game(game_id, player_count, roles)
-    return unless GameState.find(game_id).nil?
+    return if GameState.find(game_id).nil?
 
     game_state = GameState.create(id: game_id, player_count: player_count, roles: roles)
     game_state.missions = case player_count

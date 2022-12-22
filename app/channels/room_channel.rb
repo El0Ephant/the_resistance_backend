@@ -10,6 +10,9 @@ class RoomChannel < ApplicationCable::Channel
 
   def unsubscribed
   end
+  # def create_game(data)
+  #   ActionCable.server.broadcast(@room_name, GameStateHelper::create_game(@room_id, data["player_count"], data["roles"]))
+  # end
 
   # lobby admin actions
   def hand_over_adminship(data)

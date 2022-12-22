@@ -14,7 +14,7 @@ class RoomChannel < ApplicationCable::Channel
   # lobby admin actions
   def hand_over_adminship(data)
     return unless have_admin_permission?(GameStateHelper::State::WAITING)
-    ActionCable.server.broadcast(@room_name, GameStateHelper::hand_over_adminship(data["player"]))
+    ActionCable.server.broadcast(@room_name, GameStateHelper::hand_over_adminship(@room_id, data["player"]))
   end
 
   def kick_player(data)

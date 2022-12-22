@@ -4,7 +4,6 @@ class PrivateChannel < ApplicationCable::Channel
     @player_id = connection.current_user["id"]
     @room_id = params[:room_id]
     stream_from "player_#{@player_id}"
-
   end
 
   def unsubscribed

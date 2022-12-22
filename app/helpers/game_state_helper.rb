@@ -24,6 +24,9 @@ module GameStateHelper
     MORGANA = "Morgana"
     MORDRED = "Mordred"
     OBERON = "Oberon"
+
+    UNKNOWN_LOYAL = "unknownLoyal"
+    UNKNOWN_EVIL = "unknownEvil"
   end
 
   module Mission
@@ -64,14 +67,17 @@ module GameStateHelper
     game_state = GameState.find(game_id)
     game_state.players.include?(user_id)
   end
+
   def is_admin?(game_id, user_id)
     game_state = GameState.find(game_id)
     game_state.admin_id == user_id
   end
+
   def is_leader?(game_id, user_id)
     game_state = GameState.find(game_id)
     game_state.leader_id == user_id
   end
+
   def right_role?(game_id, user_id, *roles)
     game_state = GameState.find(game_id)
     roles.include?(game_state.player_roles[user_id.to_s])
@@ -83,12 +89,12 @@ module GameStateHelper
     create_hash(game_state)
   end
 
-  def start_game(game_id, player_id)
+  def start_game(game_id)
     game_state = GameState.find(game_id)
     players = game_state.players
     roles = game_state.roles
     game_state.players_roles = players.zip(roles.shuffle).to_h
-    game_state.leader_id = game_state.admin_id
+    game_state.leader_id = game_state.players.sample
     game_state.save
     create_hash(game_state)
   end
@@ -107,11 +113,9 @@ module GameStateHelper
     create_hash(game_state)
   end
 
-  def hand_over_leadership(game_id)
+  def hand_over_adminship(game_id, player_id)
     game_state = GameState.find(game_id)
-    players = game_state.players
-    game_state.leader_id = players.sample
-    game_state.save
+    game_state.admin_id = player_id
     create_hash(game_state)
   end
 
@@ -135,6 +139,7 @@ module GameStateHelper
       if game_state.current_vote == 5
         game_state.current_vote = 1
         game_state.state = State::VOTE_FOR_RESULT
+        game_state.save
         return create_hash(game_state)
       else
         game_state.state = State::VOTE_FOR_CANDIDATES
@@ -146,21 +151,20 @@ module GameStateHelper
 
   def vote_for_candidates(game_id, player_id, vote)
     game_state = GameState.find(game_id)
-    game_state.votes_for_candidates[player_id.to_s] = vote
-    if game_state.votes_for_candidates.size == game_state.players_count
-      game_state.state = State::VOTE_FOR_CANDIDATES_REVEALED
+    GameState.with_session do |s|
+      s.start_transaction
+      game_state.votes_for_candidates[player_id.to_s] = vote
+      if game_state.votes_for_candidates.size == game_state.players_count
+        game_state.state = State::VOTE_FOR_CANDIDATES_REVEALED
+      end
+      game_state.save
+      s.commit_transaction
     end
-    game_state.save
     create_hash(game_state)
   end
 
   def after_vote(game_id)
     game_state = GameState.find(game_id)
-    if game_state.current_vote == 5
-      game_state.state = State::VOTE_FOR_RESULT
-      game_state.save
-      return create_hash(game_state)
-    end
 
     result = 0
     game_state.votes_for_candidates.values.each do |value|
@@ -182,17 +186,22 @@ module GameStateHelper
 
   def vote_for_result(game_id, player_id, vote)
     game_state = GameState.find(game_id)
-    if game_state.candidates.include?(player_id)
-      game_state.votes_for_result[player_id] = vote
+    GameState.with_session do |s|
+      s.start_transaction
+
+      if game_state.candidates.include?(player_id)
+        game_state.votes_for_result[player_id] = vote
+      end
+      if game_state.votes_for_result.size == game_state.candidates.size
+        game_state.state = State::VOTE_FOR_RESULT_REVEALED
+        game_state.missions[game_state.current_mission] = game_state.votes_for_result.values.all? ?
+                                                            Mission::WIN
+                                                            :
+                                                            Mission::LOOSE
+      end
+      game_state.save
+      s.commit_transaction
     end
-    if game_state.votes_for_result.size == game_state.candidates.size
-      game_state.state = State::VOTE_FOR_RESULT_REVEALED
-      game_state.missions[game_state.current_mission] = game_state.votes_for_result.values.all? ?
-                                                          Mission::WIN
-                                                          :
-                                                          Mission::LOOSE
-    end
-    game_state.save
     create_hash(game_state)
   end
 
@@ -219,6 +228,7 @@ module GameStateHelper
     game_state.candidates = []
     game_state.votes_for_candidates = {}
     game_state.votes_for_result = {}
+    game_state.leader_id = game_state.players.sample
     game_state.save
     create_hash(game_state)
   end
@@ -230,7 +240,14 @@ module GameStateHelper
     create_hash(game_state)
   end
 
-  def confirm_murder
+  def unpick_player_for_murder(game_id, player_id)
+    game_state = GameState.find(game_id)
+    game_state.murdered_id = nil
+    game_state.save
+    create_hash(game_state)
+  end
+
+  def confirm_murder(game_id)
     game_state = GameState.find(game_id)
     if game_state.murdered_id != nil
       if game_state.player_roles[game_state.murdered_id.to_s] == Role::MERLIN
@@ -241,6 +258,47 @@ module GameStateHelper
     end
     game_state.save
     create_hash(game_state)
+  end
+
+  def get_roles(game_id, player_id)
+    game_state = GameState.find(game_id)
+    players = game_state.players
+    players.each do |x|
+      res[x] = {Name: User.find(x).nickname}
+    end
+    return res if game_state.state == State::WAITING
+
+    if game_state.state == State::BAD_FINAL || game_state.state == State::GOOD_FINAL
+      players.each do |x|
+        res[x][:Role] = pl_roles[x]
+      end
+      return res
+    end
+
+    pl_roles = game_state.players_roles
+    res[player_id][:Role] = pl_roles[player_id]
+
+    case pl_roles[player_id]
+    when MERLIN
+      pl_roles.each do |key, value|
+        if [ASSASSIN, MORGANA, OBERON, EVIL].include? value
+          res[key][:Role] = UNKNOWN_EVIL
+        end
+      end
+    when PERCIVAL
+      pl_roles.each do |key, value|
+        if [MERLIN, MORGANA].include? value
+          res[key][:Role] = UNKNOWN_LOYAL
+        end
+      end
+    when ASSASSIN, MORGANA, MORDRED, EVIL
+      pl_roles.except[player_id].each do |key, value|
+        if [ASSASSIN, MORGANA, MORDRED, OBERON, EVIL].include? value
+          res[key][:Role] = UNKNOWN_EVIL
+        end
+      end
+    else
+    end
   end
 
   #private

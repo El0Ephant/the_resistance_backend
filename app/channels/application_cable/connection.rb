@@ -2,13 +2,12 @@ module ApplicationCable
   class Connection < ActionCable::Connection::Base
     identified_by :current_user
     def connect
-      self.current_user = "test_user"
-      #self.current_user = find_verified_user
+      self.current_user = find_verified_user
     end
     def find_verified_user
-      # request.params[:token] or something like: request.headers['Authorization'].split(' ')[1]
+      # request.params[:token] or something like: request.authorization.split(' ')[1]
       begin
-        jwt_payload = JWT.decode(request.params[:token],
+        jwt_payload = JWT.decode(request.authorization.split(' ')[1],
                                  ENV['DEVISE_JWT_SECRET_KEY']).first
       rescue JWT::ExpiredSignature
         logger.error "A connection attempt was rejected due to an expired token"

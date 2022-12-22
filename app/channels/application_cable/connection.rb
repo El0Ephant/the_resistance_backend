@@ -19,5 +19,3 @@ module ApplicationCable
     end
   end
 end
-
-#ws://localhost:3000/cable?token=1111

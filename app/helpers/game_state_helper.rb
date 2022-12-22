@@ -39,7 +39,10 @@ module GameStateHelper
     LOOSE = "Loose"
   end
 
-  def create_game(game_id, player_count, roles)
+  def create_game(player_count, roles)
+    max_id = GameState.max(:_id).nil? ? 0 : GameState.max(:_id)
+    game_id = (1..max_id + 1).to_a.find_index { |x| GameState.find(x).nil? } + 1
+
     game_state = GameState.create(id: game_id, player_count: player_count, roles: roles)
     game_state.missions = case player_count
                           when 5
@@ -57,6 +60,7 @@ module GameStateHelper
                           else
                             [2, 2, 2, 2, 2] # для тестирования
                           end
+    game_id
   end
 
   def delete_game(game_id)

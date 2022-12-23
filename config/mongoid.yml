@@ -21,6 +21,6 @@ test:
 production:
   clients:
     default:
-      uri: <%=ENV['MONGOID_URI']%>
+      uri: "<%=ENV['MONGOID_URI']%>"
   options:
     raise_not_found_error: false

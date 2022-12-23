@@ -1,7 +1,9 @@
 development:
   clients:
     default:
-      uri: mongodb+srv://the_resistance:<%= ENV['MONGOID_PASSWORD'] %>@the-resistance-mongo.vsvu7pz.mongodb.net/?retryWrites=true&w=majority
+      database: the_resistance_development
+      hosts:
+        - localhost:27017
   options:
     raise_not_found_error: false
 
@@ -19,6 +21,6 @@ test:
 production:
   clients:
     default:
-      uri: mongodb+srv://the_resistance:<%= ENV['MONGOID_PASSWORD'] %>@the-resistance-mongo.vsvu7pz.mongodb.net/?retryWrites=true&w=majority
+      uri: <%=ENV['MONGOID_URI']%>
   options:
     raise_not_found_error: false

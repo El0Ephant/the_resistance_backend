@@ -7,7 +7,8 @@ module ApplicationCable
     def find_verified_user
       # request.params[:token] or something like: request.authorization.split(' ')[1]
       begin
-        jwt_payload = JWT.decode(request.authorization.split(' ')[1],
+        puts request.headers.to_h
+        jwt_payload = JWT.decode(request.headers[:Authorization].split(' ')[1],
                                  ENV['DEVISE_JWT_SECRET_KEY']).first
       rescue JWT::ExpiredSignature
         logger.error "A connection attempt was rejected due to an expired token"

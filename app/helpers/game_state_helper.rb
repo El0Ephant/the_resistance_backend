@@ -98,7 +98,7 @@ module GameStateHelper
 
   def self.start_game(game_id)
     game_state = GameState.find(game_id)
-    return game_state unless game_state.player_count == game_state.players.size
+    return create_state_hash(game_state) unless game_state.player_count == game_state.players.size
 
     players = game_state.players
     roles = game_state.roles

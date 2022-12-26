@@ -60,7 +60,7 @@ class RoomChannel < ApplicationCable::Channel
     ActionCable.server.broadcast(@room_name, st)
     return unless st["state"] == GameStateHelper::State::VOTE_FOR_CANDIDATES_REVEALED
 
-    sleep(@timeout)
+    #sleep(@timeout)
     ActionCable.server.broadcast(@room_name, GameStateHelper::after_vote(@room_id))
   end
 
@@ -70,7 +70,7 @@ class RoomChannel < ApplicationCable::Channel
     ActionCable.server.broadcast(@room_name, st)
     return unless st["state"] == GameStateHelper::State::VOTE_FOR_RESULT_REVEALED
 
-    sleep(@timeout)
+    #sleep(@timeout)
     ActionCable.server.broadcast(@room_name, GameStateHelper::end_step(@room_id))
   end
 

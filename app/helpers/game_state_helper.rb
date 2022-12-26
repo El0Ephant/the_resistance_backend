@@ -98,6 +98,8 @@ module GameStateHelper
 
   def self.start_game(game_id)
     game_state = GameState.find(game_id)
+    return game_state unless game_state.player_count == game_state.players.size
+
     players = game_state.players
     roles = game_state.roles
     game_state.players_roles = players.zip(roles.shuffle).to_h

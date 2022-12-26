@@ -104,6 +104,7 @@ module GameStateHelper
     roles = game_state.roles
     game_state.player_roles = players.zip(roles.shuffle).to_h
     game_state.leader_id = game_state.players.sample
+    game_state.state = GameStateHelper::State::PICK_CANDIDATES
     game_state.save
     create_state_hash(game_state)
   end

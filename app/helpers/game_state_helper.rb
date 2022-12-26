@@ -291,22 +291,22 @@ module GameStateHelper
     res[player_id][:Role] = pl_roles[player_id]
 
     case pl_roles[player_id]
-    when MERLIN
+    when Role::MERLIN
       pl_roles.each do |key, value|
-        if [ASSASSIN, MORGANA, OBERON, EVIL].include? value
-          res[key][:Role] = UNKNOWN_EVIL
+        if [Role::ASSASSIN, Role::MORGANA, Role::OBERON, Role::EVIL].include? value
+          res[key][:Role] = Role::UNKNOWN_EVIL
         end
       end
-    when PERCIVAL
+    when Role::PERCIVAL
       pl_roles.each do |key, value|
-        if [MERLIN, MORGANA].include? value
-          res[key][:Role] = UNKNOWN_LOYAL
+        if [Role::MERLIN, Role::MORGANA].include? value
+          res[key][:Role] = Role::UNKNOWN_LOYAL
         end
       end
-    when ASSASSIN, MORGANA, MORDRED, EVIL
+    when Role::ASSASSIN, Role::MORGANA, Role::MORDRED, Role::EVIL
       pl_roles.except[player_id].each do |key, value|
-        if [ASSASSIN, MORGANA, MORDRED, OBERON, EVIL].include? value
-          res[key][:Role] = UNKNOWN_EVIL
+        if [Role::ASSASSIN, Role::MORGANA, Role::MORDRED, Role::OBERON, Role::EVIL].include? value
+          res[key][:Role] = Role::UNKNOWN_EVIL
         end
       end
     else

@@ -290,6 +290,12 @@ module GameStateHelper
     pl_roles = game_state.player_roles
     res[player_id][:Role] = pl_roles[player_id.to_s]
 
+    puts '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+    puts player_id
+    puts pl_roles
+    puts res
+    p pl_roles
+
     case pl_roles[player_id.to_s]
     when Role::MERLIN
       pl_roles.each do |key, value|

@@ -119,6 +119,7 @@ module GameStateHelper
   def self.free_up_seat(game_id, player_id)
     game_state = GameState.find(game_id)
     game_state.players.delete(player_id)
+    game_state.leader_id = game_state.players.sample if game_state.admin_id == player_id
     game_state.save
     create_state_hash(game_state)
   end
@@ -286,7 +287,7 @@ module GameStateHelper
       return { info: res }
     end
 
-    pl_roles = game_state.players_roles
+    pl_roles = game_state.player_roles
     res[player_id][:Role] = pl_roles[player_id]
 
     case pl_roles[player_id]

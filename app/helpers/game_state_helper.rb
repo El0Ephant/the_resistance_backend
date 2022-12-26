@@ -304,7 +304,7 @@ module GameStateHelper
         end
       end
     when Role::ASSASSIN, Role::MORGANA, Role::MORDRED, Role::EVIL
-      pl_roles.excluding[player_id].each do |key, value|
+      pl_roles.except(player_id).each do |key, value|
         if [Role::ASSASSIN, Role::MORGANA, Role::MORDRED, Role::OBERON, Role::EVIL].include? value
           res[key][:Role] = Role::UNKNOWN_EVIL
         end

@@ -58,7 +58,7 @@ class RoomChannel < ApplicationCable::Channel
     return unless GameStateHelper::right_state?(@room_id, GameStateHelper::State::VOTE_FOR_CANDIDATES)
     st = GameStateHelper::vote_for_candidates(@room_id, @player_id, data["choice"])
     ActionCable.server.broadcast(@room_name, st)
-    return unless st["state"] == State::VOTE_FOR_CANDIDATES_REVEALED
+    return unless st["state"] == GameStateHelper::State::VOTE_FOR_CANDIDATES_REVEALED
 
     sleep(@timeout)
     ActionCable.server.broadcast(@room_name, GameStateHelper::after_vote(@room_id))
@@ -68,7 +68,7 @@ class RoomChannel < ApplicationCable::Channel
     return unless GameStateHelper::right_state?(@room_id, GameStateHelper::State::VOTE_FOR_RESULT)
     st = GameStateHelper::vote_for_result(@room_id, @player_id, data["result"])
     ActionCable.server.broadcast(@room_name, st)
-    return unless st["state"] == State::VOTE_FOR_RESULT_REVEALED
+    return unless st["state"] == GameStateHelper::State::VOTE_FOR_RESULT_REVEALED
 
     sleep(@timeout)
     ActionCable.server.broadcast(@room_name, GameStateHelper::end_step(@room_id))

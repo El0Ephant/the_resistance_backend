@@ -165,7 +165,7 @@ module GameStateHelper
     GameState.with_session do |s|
       s.start_transaction
       game_state.votes_for_candidates[player_id.to_s] = vote
-      if game_state.votes_for_candidates.size == game_state.players_count
+      if game_state.votes_for_candidates.size == game_state.player_count
         game_state.state = State::VOTE_FOR_CANDIDATES_REVEALED
       end
       game_state.save

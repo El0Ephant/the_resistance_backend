@@ -288,9 +288,9 @@ module GameStateHelper
     end
 
     pl_roles = game_state.player_roles
-    res[player_id][:Role] = pl_roles[player_id]
+    res[player_id][:Role] = pl_roles[player_id.to_s]
 
-    case pl_roles[player_id]
+    case pl_roles[player_id.to_s]
     when Role::MERLIN
       pl_roles.each do |key, value|
         if [Role::ASSASSIN, Role::MORGANA, Role::OBERON, Role::EVIL].include? value

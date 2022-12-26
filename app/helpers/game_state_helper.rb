@@ -272,8 +272,9 @@ module GameStateHelper
   end
 
   def self.get_roles(game_id, player_id)
+    player_id = player_id.to_s
     game_state = GameState.find(game_id)
-    players = game_state.players
+    players = game_state.players.map{ |id| id.to_s }
     res = {}
     players.each do |x|
       res[x] = {Name: User.find(x).nickname}
@@ -288,7 +289,7 @@ module GameStateHelper
     end
 
     pl_roles = game_state.player_roles
-    res[player_id][:Role] = pl_roles[player_id.to_s]
+    res[player_id][:Role] = pl_roles[player_id]
 
     puts '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
     puts player_id
@@ -296,7 +297,7 @@ module GameStateHelper
     puts res
     p pl_roles
 
-    case pl_roles[player_id.to_s]
+    case pl_roles[player_id]
     when Role::MERLIN
       pl_roles.each do |key, value|
         if [Role::ASSASSIN, Role::MORGANA, Role::OBERON, Role::EVIL].include? value

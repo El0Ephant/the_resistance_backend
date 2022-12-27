@@ -65,7 +65,7 @@ class RoomChannel < ApplicationCable::Channel
 
   def vote_for_result(data)
     return unless GameStateHelper::right_state?(@room_id, GameStateHelper::State::VOTE_FOR_RESULT)
-    st = GameStateHelper::vote_for_result(@room_id, @player_id, data["result"])
+    st = GameStateHelper::vote_for_result(@room_id, @player_id, data["choice"])
     return unless st[:runtimeType] == GameStateHelper::State::VOTE_FOR_RESULT_REVEALED
     #ActionCable.server.broadcast(@room_name, st)
     #sleep(@timeout)

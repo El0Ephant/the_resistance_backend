@@ -205,7 +205,7 @@ module GameStateHelper
       s.start_transaction
 
       if game_state.candidates.include?(player_id)
-        game_state.votes_for_result[player_id] = vote
+        game_state.votes_for_result[player_id.to_s] = vote
       end
       if game_state.votes_for_result.size == game_state.candidates.size
         game_state.state = State::VOTE_FOR_RESULT_REVEALED

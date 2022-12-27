@@ -109,6 +109,10 @@ module GameStateHelper
     create_state_hash(game_state)
   end
 
+  def self.resend(game_id)
+    create_state_hash(GameState.find(game_id))
+  end
+
   def self.take_seat(game_id, player_id)
     game_state = GameState.find(game_id)
     game_state.players << player_id

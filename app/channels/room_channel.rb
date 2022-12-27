@@ -29,7 +29,7 @@ class RoomChannel < ApplicationCable::Channel
 
   # other actions
   def take_seat
-    return if GameStateHelper::is_here?(@room_id, @player_id)
+    ActionCable.server.broadcast(@room_name, GameStateHelper::resend(@room_id)) if GameStateHelper::is_here?(@room_id, @player_id)
     ActionCable.server.broadcast(@room_name, GameStateHelper::take_seat(@room_id, @player_id))
   end
 

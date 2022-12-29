@@ -29,8 +29,11 @@ class RoomChannel < ApplicationCable::Channel
 
   # other actions
   def take_seat
-    ActionCable.server.broadcast(@room_name, GameStateHelper::resend(@room_id)) if GameStateHelper::is_here?(@room_id, @player_id)
-    ActionCable.server.broadcast(@room_name, GameStateHelper::take_seat(@room_id, @player_id))
+    if GameStateHelper::is_here?(@room_id, @player_id)
+      ActionCable.server.broadcast(@room_name, GameStateHelper::resend(@room_id))
+    else
+      ActionCable.server.broadcast(@room_name, GameStateHelper::take_seat(@room_id, @player_id))
+    end
   end
 
   def free_up_seat

@@ -20,5 +20,6 @@ class GameState
   field :votes_for_result, type: Hash, default: {}
   field :murdered_id, type: Integer
 
+  field :online_players, type: Array, default: {}
 end
 

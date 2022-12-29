@@ -39,6 +39,23 @@ module GameStateHelper
     LOOSE = "Loose"
   end
 
+  def self.connect_player(game_id, player_id)
+    game_state = GameState.find(game_id)
+    return if game_state.nil?
+
+    game_state.online_players << player_id
+    game_state.save
+  end
+
+  def self.disconnect_player(game_id, player_id)
+    game_state = GameState.find(game_id)
+    return if game_state.nil?
+
+    game_state.online_players.delete(player_id)
+    game_state.save
+    game_state.online_players
+  end
+
   def self.create_game(player_count, roles, creator_id)
     max_id = GameState.max(:_id).nil? ? 0 : GameState.max(:_id)
     game_id = (1..max_id + 1).to_a.find_index { |x| GameState.find(x).nil? } + 1
@@ -70,24 +87,24 @@ module GameStateHelper
     GameState.find(game_id).delete
   end
 
-  def self.is_here?(game_id, user_id)
+  def self.is_here?(game_id, player_id)
     game_state = GameState.find(game_id)
-    game_state.players.include?(user_id)
+    game_state.players.include?(player_id)
   end
 
-  def self.is_admin?(game_id, user_id)
+  def self.is_admin?(game_id, player_id)
     game_state = GameState.find(game_id)
-    game_state.admin_id == user_id
+    game_state.admin_id == player_id
   end
 
-  def self.is_leader?(game_id, user_id)
+  def self.is_leader?(game_id, player_id)
     game_state = GameState.find(game_id)
-    game_state.leader_id == user_id
+    game_state.leader_id == player_id
   end
 
-  def self.right_role?(game_id, user_id, *roles)
+  def self.right_role?(game_id, player_id, *roles)
     game_state = GameState.find(game_id)
-    roles.include?(game_state.player_roles[user_id.to_s])
+    roles.include?(game_state.player_roles[player_id.to_s])
   end
 
   def self.right_state?(game_id, state)

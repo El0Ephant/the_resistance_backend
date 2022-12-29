@@ -6,9 +6,14 @@ class RoomChannel < ApplicationCable::Channel
     @room_name = "room_#{@room_id}"
     stream_from @room_name
     @timeout = 2
+    GameStateHelper::connect_player(@room_id, @player_id)
   end
 
   def unsubscribed
+    return unless GameStateHelper::disconnect_player(@room_id, @player_id).empty?
+
+    stop_stream_from @room_name
+    GameStateHelper::delete_game(@room_id)
   end
 
   # lobby admin actions

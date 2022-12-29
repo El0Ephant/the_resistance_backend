@@ -84,37 +84,52 @@ module GameStateHelper
   end
 
   def self.delete_game(game_id)
-    GameState.find(game_id).delete
+    game_state = GameState.find(game_id)
+    return if game_state.nil?
+
+    game_state.delete
   end
 
   def self.is_here?(game_id, player_id)
     game_state = GameState.find(game_id)
+    return if game_state.nil?
+
     game_state.players.include?(player_id)
   end
 
   def self.is_admin?(game_id, player_id)
     game_state = GameState.find(game_id)
+    return if game_state.nil?
+
     game_state.admin_id == player_id
   end
 
   def self.is_leader?(game_id, player_id)
     game_state = GameState.find(game_id)
+    return if game_state.nil?
+
     game_state.leader_id == player_id
   end
 
   def self.right_role?(game_id, player_id, *roles)
     game_state = GameState.find(game_id)
+    return if game_state.nil?
+
     roles.include?(game_state.player_roles[player_id.to_s])
   end
 
   def self.right_state?(game_id, state)
     game_state = GameState.find(game_id)
+    return if game_state.nil?
+
     game_state.state == state
     create_state_hash(game_state)
   end
 
   def self.start_game(game_id)
     game_state = GameState.find(game_id)
+    return if game_state.nil?
+
     return create_state_hash(game_state) unless game_state.player_count == game_state.players.size
 
     players = game_state.players
@@ -127,11 +142,16 @@ module GameStateHelper
   end
 
   def self.resend(game_id)
-    create_state_hash(GameState.find(game_id))
+    game_state = GameState.find(game_id)
+    return if game_state.nil?
+
+    create_state_hash(game_state)
   end
 
   def self.take_seat(game_id, player_id)
     game_state = GameState.find(game_id)
+    return if game_state.nil?
+
     game_state.players << player_id
     game_state.save
     create_state_hash(game_state)
@@ -139,6 +159,8 @@ module GameStateHelper
 
   def self.free_up_seat(game_id, player_id)
     game_state = GameState.find(game_id)
+    return if game_state.nil?
+
     game_state.players.delete(player_id)
     game_state.leader_id = game_state.players.sample if game_state.admin_id == player_id
     game_state.save
@@ -147,12 +169,16 @@ module GameStateHelper
 
   def self.hand_over_adminship(game_id, player_id)
     game_state = GameState.find(game_id)
+    return if game_state.nil?
+
     game_state.admin_id = player_id
     create_state_hash(game_state)
   end
 
   def self.pick_player_for_mission(game_id, player_id)
     game_state = GameState.find(game_id)
+    return if game_state.nil?
+
     game_state.candidates << player_id
     game_state.save
     create_state_hash(game_state)
@@ -160,6 +186,8 @@ module GameStateHelper
 
   def self.unpick_player_for_mission(game_id, player_id)
     game_state = GameState.find(game_id)
+    return if game_state.nil?
+
     game_state.candidates.delete(player_id)
     game_state.save
     create_state_hash(game_state)
@@ -167,6 +195,8 @@ module GameStateHelper
 
   def self.confirm_team(game_id)
     game_state = GameState.find(game_id)
+    return if game_state.nil?
+
     if game_state.missions[game_state.current_mission] == game_state.candidates.size
       if game_state.current_vote == 5
         game_state.current_vote = 1
@@ -183,6 +213,8 @@ module GameStateHelper
 
   def self.vote_for_candidates(game_id, player_id, vote)
     game_state = GameState.find(game_id)
+    return if game_state.nil?
+
     GameState.with_session do |s|
       s.start_transaction
       game_state.votes_for_candidates[player_id.to_s] = vote
@@ -197,6 +229,7 @@ module GameStateHelper
 
   def self.after_vote(game_id)
     game_state = GameState.find(game_id)
+    return if game_state.nil?
 
     result = 0
     game_state.votes_for_candidates.values.each do |value|
@@ -219,6 +252,8 @@ module GameStateHelper
 
   def self.vote_for_result(game_id, player_id, vote)
     game_state = GameState.find(game_id)
+    return if game_state.nil?
+
     GameState.with_session do |s|
       s.start_transaction
 
@@ -240,6 +275,7 @@ module GameStateHelper
 
   def self.end_step(game_id)
     game_state = GameState.find(game_id)
+    return if game_state.nil?
 
     missions = game_state.missions
     tally = missions.tally
@@ -269,6 +305,8 @@ module GameStateHelper
 
   def self.pick_player_for_murder(game_id, player_id)
     game_state = GameState.find(game_id)
+    return if game_state.nil?
+
     game_state.murdered_id = player_id
     game_state.save
     create_state_hash(game_state)
@@ -276,6 +314,8 @@ module GameStateHelper
 
   def self.unpick_player_for_murder(game_id, player_id)
     game_state = GameState.find(game_id)
+    return if game_state.nil?
+
     game_state.murdered_id = nil
     game_state.save
     create_state_hash(game_state)
@@ -283,6 +323,8 @@ module GameStateHelper
 
   def self.confirm_murder(game_id)
     game_state = GameState.find(game_id)
+    return if game_state.nil?
+
     if game_state.murdered_id != nil
       if game_state.player_roles[game_state.murdered_id.to_s] == Role::MERLIN
         game_state.state = State::BAD_FINAL
@@ -296,9 +338,10 @@ module GameStateHelper
   end
 
   def self.get_roles(game_id, player_id)
-    player_id = player_id.to_s
     game_state = GameState.find(game_id)
-    return if game_state.nil? #???
+    return if game_state.nil?
+
+    player_id = player_id.to_s
 
     players = game_state.players.map{ |id| id.to_s }
     res = {}

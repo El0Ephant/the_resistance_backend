@@ -7,6 +7,7 @@ class PrivateChannel < ApplicationCable::Channel
   end
 
   def unsubscribed
+    stop_stream_from "player_#{@player_id}"
   end
 
   def get_roles

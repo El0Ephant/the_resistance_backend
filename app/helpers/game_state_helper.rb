@@ -162,7 +162,7 @@ module GameStateHelper
     return if game_state.nil?
 
     game_state.players.delete(player_id)
-    game_state.leader_id = game_state.players.sample if game_state.admin_id == player_id
+    game_state.admin_id = game_state.players.sample if game_state.admin_id == player_id
     game_state.save
     create_state_hash(game_state)
   end
@@ -172,6 +172,7 @@ module GameStateHelper
     return if game_state.nil?
 
     game_state.admin_id = player_id
+    game_state.save
     create_state_hash(game_state)
   end
 

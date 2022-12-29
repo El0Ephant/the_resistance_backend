@@ -331,7 +331,7 @@ module GameStateHelper
   end
 
   #private
-  def mission_transform(mission)
+  def self.mission_transform(mission)
     case mission
     when "Win"
       true

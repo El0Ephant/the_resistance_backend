@@ -194,7 +194,7 @@ module GameStateHelper
       game_state.candidates = []
       game_state.votes_for_candidates = {}
       game_state.state = State::VOTE_FOR_CANDIDATES
-      game_state.leader_id = game_state.players[game_state.players.index(game_state.leader_id) + 1]
+      game_state.leader_id = game_state.players[(game_state.players.index(game_state.leader_id) + 1) % game_state.players.size]
     end
     game_state.save
     create_state_hash(game_state)
@@ -244,7 +244,7 @@ module GameStateHelper
     game_state.candidates = []
     game_state.votes_for_candidates = {}
     game_state.votes_for_result = {}
-    game_state.leader_id = game_state.players[game_state.players.index(game_state.leader_id) + 1]
+    game_state.leader_id = game_state.players[(game_state.players.index(game_state.leader_id) + 1) % game_state.players.size]
     game_state.save
     create_state_hash(game_state)
   end

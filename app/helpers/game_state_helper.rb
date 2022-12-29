@@ -234,8 +234,9 @@ module GameStateHelper
 
     if tally[Mission::LOOSE] == 3
       game_state.state = State::BAD_FINAL
-      game_state.save
-      return create_state_hash(game_state)
+      res = create_state_hash(game_state)
+      finish_game(game_state)
+      return res
     end
 
     game_state.current_mission += 1
@@ -272,13 +273,16 @@ module GameStateHelper
         game_state.state = State::GOOD_FINAL
       end
     end
-    game_state.save
-    create_state_hash(game_state)
+    res = create_state_hash(game_state)
+    finish_game(game_state)
+    res
   end
 
   def self.get_roles(game_id, player_id)
     player_id = player_id.to_s
     game_state = GameState.find(game_id)
+    return if game_state.nil? #???
+
     players = game_state.players.map{ |id| id.to_s }
     res = {}
     players.each do |x|
@@ -327,7 +331,30 @@ module GameStateHelper
   end
 
   #private
-
+  def mission_transform(mission)
+    case mission
+    when "Win"
+      true
+    when "Loose"
+      false
+    else
+      nil
+    end
+  end
+  def self.finish_game(game_state)
+    game = Game.create!({winner: game_state.state == State::GOOD_FINAL ? :good : :evil,
+                  murdered_id: game_state.murdered_id,
+                  mission_1: mission_transform(game_state.missions[0]),
+                  mission_2: mission_transform(game_state.missions[1]),
+                  mission_3: mission_transform(game_state.missions[2]),
+                  mission_4: mission_transform(game_state.missions[3]),
+                  mission_5: mission_transform(game_state.missions[4]),
+                  created_at: DateTime.now})
+    game_state.player_roles.each do |key, value|
+      Participation.create!({user_id: key.to_i, game_id: game.id, role: value.to_sym})
+    end
+    game_state.delete
+  end
   def self.create_state_hash(game_state)
     {
       runtimeType: game_state.state,

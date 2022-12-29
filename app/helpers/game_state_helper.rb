@@ -193,7 +193,7 @@ module GameStateHelper
       game_state.current_vote += 1
       game_state.candidates = []
       game_state.votes_for_candidates = {}
-      game_state.state = State::VOTE_FOR_CANDIDATES
+      game_state.state = State::PICK_CANDIDATES
       game_state.leader_id = game_state.players[(game_state.players.index(game_state.leader_id) + 1) % game_state.players.size]
     end
     game_state.save

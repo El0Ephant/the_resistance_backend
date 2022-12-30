@@ -208,11 +208,6 @@ module GameStateHelper
     end
     game.to_h
   end
-  def self.reset_votes_for_result(game)
-    game.votes_for_result = {}
-    game.save
-    game.to_h
-  end
   def self.pick_player_for_murder(game, player_id)
     game.murdered_id = player_id
     game.save

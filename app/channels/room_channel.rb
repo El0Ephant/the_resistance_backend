@@ -93,11 +93,7 @@ class RoomChannel < ApplicationCable::Channel
 
     return unless is_here? && right_state?(GameStateHelper::State::VOTE_FOR_RESULT)
     game_hash = GameStateHelper::vote_for_result(@game, @player_id, data["choice"])
-    unless right_state?(GameStateHelper::State::VOTE_FOR_RESULT)
-      ActionCable.server.broadcast(@room_name, game_hash)
-      sleep @timeout
-      ActionCable.server.broadcast(@room_name, GameStateHelper::reset_votes_for_result(@game))
-    end
+    ActionCable.server.broadcast(@room_name, game_hash) unless right_state?(GameStateHelper::State::VOTE_FOR_RESULT)
   end
 
   # def pick_player_for_lol(data) # the Lady of the Lake

@@ -19,6 +19,6 @@ Rails.application.routes.draw do
     get 'user/:id', to: 'profile#account_info'
     get 'user/:id/stat', to: 'profile#stat'
     get 'user/:id/history', to: 'profile#games_history'
-    post 'new_game', to: 'new_game#new_game'
+    post 'create_game', to: 'create_game#create_game'
   end
 end

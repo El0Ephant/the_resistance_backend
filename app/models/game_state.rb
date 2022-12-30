@@ -7,6 +7,7 @@ class GameState
 
   field :roles, type: Array, default: []
   field :players, type: Array, default: []
+  field :need_fails, type: Array, default: []
 
   field :player_roles, type: Hash, default: {}
   field :missions, type: Array, default: []
@@ -21,5 +22,23 @@ class GameState
   field :murdered_id, type: Integer
 
   field :online_players, type: Array, default: []
+
+  def to_h
+    {
+      runtimeType: self.state,
+      gameId: self.id,
+      adminId: self.admin_id,
+      playerCount: self.player_count,
+      players: self.players,
+      missions: self.missions,
+      currentMission: self.current_mission,
+      leaderId: self.leader_id,
+      currentVote: self.current_vote,
+      votesForCandidates: self.votes_for_candidates,
+      candidates: self.candidates,
+      votesForResult: self.votes_for_result.values.shuffle,
+      murderedId: self.murdered_id,
+    }
+  end
 end
 

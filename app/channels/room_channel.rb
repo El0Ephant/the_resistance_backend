@@ -1,83 +1,103 @@
 class RoomChannel < ApplicationCable::Channel
-
+  @timeout = 2
   def subscribed
     @player_id = connection.current_user["id"]
-    @room_id = params[:room_id]
-    @room_name = "room_#{@room_id}"
+    @room_name = "room_#{params[:room_id]}"
+    @private_stream_name = "private_stream_#{@player_id}"
+    @game = GameState.find(params[:room_id])
     stream_from @room_name
-    @timeout = 2
-    GameStateHelper::connect_player(@room_id, @player_id)
+    return unless game_exists?
+
+    stream_from @private_stream_name
+    ActionCable.server.broadcast(@private_stream_name, @game.to_h)
+    GameStateHelper::connect_player(@game, @player_id)
   end
 
   def unsubscribed
-    return unless GameStateHelper::disconnect_player(@room_id, @player_id).empty?
-
-    stop_stream_from @room_name
-    GameStateHelper::delete_game(@room_id)
+    stop_stream_from @private_stream_name
+    @game.delete if GameStateHelper::disconnect_player(@game, @player_id).empty? && right_state?(GameStateHelper::State::WAITING)
+    stop_stream_from @room_name if @game.nil?
   end
 
   # lobby admin actions
   def hand_over_adminship(data)
-    return unless have_admin_permission?(GameStateHelper::State::WAITING)
-    ActionCable.server.broadcast(@room_name, GameStateHelper::hand_over_adminship(@room_id, data["player"]))
+    return unless game_exists?
+    return unless is_admin? && right_state?(GameStateHelper::State::WAITING)
+
+    ActionCable.server.broadcast(@room_name, GameStateHelper::hand_over_adminship(@game, data["player"]))
   end
 
   def kick_player(data)
-    return unless have_admin_permission?(GameStateHelper::State::WAITING)
-    ActionCable.server.broadcast(@room_name, GameStateHelper::free_up_seat(@room_id, data["player"]))
+    return unless game_exists?
+    return unless is_admin? && right_state?(GameStateHelper::State::WAITING)
+
+    ActionCable.server.broadcast(@room_name, GameStateHelper::free_up_seat(@game, data["player"]))
   end
 
   def start_game
-    return unless have_admin_permission?(GameStateHelper::State::WAITING)
-    ActionCable.server.broadcast(@room_name, GameStateHelper::start_game(@room_id))
+    return unless game_exists?
+    return unless is_admin? && right_state?(GameStateHelper::State::WAITING)
+
+    ActionCable.server.broadcast(@room_name, GameStateHelper::start_game(@game))
   end
 
   # other actions
   def take_seat
-    if GameStateHelper::is_here?(@room_id, @player_id)
-      ActionCable.server.broadcast(@room_name, GameStateHelper::resend(@room_id))
-    else
-      ActionCable.server.broadcast(@room_name, GameStateHelper::take_seat(@room_id, @player_id))
-    end
+    return unless game_exists?
+
+    ActionCable.server.broadcast(@room_name, GameStateHelper::take_seat(@game, @player_id))
   end
 
   def free_up_seat
-    return unless GameStateHelper::is_here?(@room_id, @player_id)
-    ActionCable.server.broadcast(@room_name, GameStateHelper::free_up_seat(@room_id, @player_id))
+    return unless game_exists? && is_here?
+
+    ActionCable.server.broadcast(@room_name, GameStateHelper::free_up_seat(@game, @player_id))
   end
 
   # in-game actions
   def pick_player_for_mission(data)
-    return unless have_lobby_leader_permission?(GameStateHelper::State::PICK_CANDIDATES)
-    ActionCable.server.broadcast(@room_name, GameStateHelper::pick_player_for_mission(@room_id, data["player"]))
+    return unless game_exists?
+
+    return unless is_leader? && right_state?(GameStateHelper::State::PICK_CANDIDATES)
+    ActionCable.server.broadcast(@room_name, GameStateHelper::pick_player_for_mission(@game, data["player"]))
   end
 
   def unpick_player_for_mission(data)
-    return unless have_lobby_leader_permission?(GameStateHelper::State::PICK_CANDIDATES)
-    ActionCable.server.broadcast(@room_name, GameStateHelper::unpick_player_for_mission(@room_id, data["player"]))
+    return unless game_exists?
+
+    return unless is_leader? && right_state?(GameStateHelper::State::PICK_CANDIDATES)
+    ActionCable.server.broadcast(@room_name, GameStateHelper::unpick_player_for_mission(@game, data["player"]))
   end
 
   def confirm_team
-    return unless have_lobby_leader_permission?(GameStateHelper::State::PICK_CANDIDATES)
-    ActionCable.server.broadcast(@room_name, GameStateHelper::confirm_team(@room_id))
+    return unless game_exists?
+
+    return unless is_leader? && right_state?(GameStateHelper::State::PICK_CANDIDATES)
+    ActionCable.server.broadcast(@room_name, GameStateHelper::confirm_team(@game))
   end
 
   def vote_for_candidates(data)
-    return unless GameStateHelper::right_state?(@room_id, GameStateHelper::State::VOTE_FOR_CANDIDATES)
-    st = GameStateHelper::vote_for_candidates(@room_id, @player_id, data["choice"])
-    #ActionCable.server.broadcast(@room_name, st)
-    return unless st[:runtimeType] == GameStateHelper::State::VOTE_FOR_CANDIDATES_REVEALED
-    #sleep(@timeout)
-    ActionCable.server.broadcast(@room_name, GameStateHelper::after_vote(@room_id))
+    return unless game_exists?
+
+    return unless is_here? && right_state?(GameStateHelper::State::VOTE_FOR_CANDIDATES)
+    game_hash = GameStateHelper::vote_for_candidates(@game, @player_id, data["choice"])
+    unless right_state?(GameStateHelper::State::VOTE_FOR_CANDIDATES)
+      ActionCable.server.broadcast(@room_name, game_hash)
+      sleep @timeout
+      ActionCable.server.broadcast(@room_name, GameStateHelper::reset_votes_for_candidates(@game))
+    end
   end
 
   def vote_for_result(data)
-    return unless GameStateHelper::right_state?(@room_id, GameStateHelper::State::VOTE_FOR_RESULT)
-    st = GameStateHelper::vote_for_result(@room_id, @player_id, data["choice"])
-    return unless st[:runtimeType] == GameStateHelper::State::VOTE_FOR_RESULT_REVEALED
-    #ActionCable.server.broadcast(@room_name, st)
-    #sleep(@timeout)
-    ActionCable.server.broadcast(@room_name, GameStateHelper::end_step(@room_id))
+    return unless game_exists?
+
+    return unless is_here? && right_state?(GameStateHelper::State::VOTE_FOR_RESULT)
+    game_hash = GameStateHelper::vote_for_result(@game, @player_id, data["choice"])
+    unless right_state?(GameStateHelper::State::VOTE_FOR_RESULT)
+      ActionCable.server.broadcast(@room_name, game_hash)
+      sleep @timeout
+      ActionCable.server.broadcast(@room_name, GameStateHelper::reset_votes_for_result(@game))
+    end
   end
 
   # def pick_player_for_lol(data) # the Lady of the Lake
@@ -91,30 +111,55 @@ class RoomChannel < ApplicationCable::Channel
   # end
 
   def pick_player_for_murder(data)
-    return unless have_permission?(GameStateHelper::State::PICK_PLAYER_FOR_MURDER, GameStateHelper::Role::ASSASSIN)
-    ActionCable.server.broadcast(@room_name, GameStateHelper::pick_player_for_murder(@room_id, data["player"]))
+    return unless game_exists?
+
+    return unless is_here? && right_state?(GameStateHelper::State::PICK_PLAYER_FOR_MURDER) && right_role?(GameStateHelper::Role::ASSASSIN)
+    ActionCable.server.broadcast(@room_name, GameStateHelper::pick_player_for_murder(@game, data["player"]))
   end
   def unpick_player_for_murder(data)
-    return unless have_permission?(GameStateHelper::State::PICK_PLAYER_FOR_MURDER, GameStateHelper::Role::ASSASSIN)
-    ActionCable.server.broadcast(@room_name, GameStateHelper::unpick_player_for_murder(@room_id, data["player"]))
+    return unless game_exists?
+
+    return unless is_here? && right_state?(GameStateHelper::State::PICK_PLAYER_FOR_MURDER) && right_role?(GameStateHelper::Role::ASSASSIN)
+    ActionCable.server.broadcast(@room_name, GameStateHelper::unpick_player_for_murder(@game, data["player"]))
   end
 
   def confirm_murder
-    return unless have_permission?(GameStateHelper::State::PICK_PLAYER_FOR_MURDER, GameStateHelper::Role::ASSASSIN)
-    ActionCable.server.broadcast(@room_name, GameStateHelper::confirm_murder(@room_id))
+    return unless game_exists?
+
+    return unless is_here? && right_state?(GameStateHelper::State::PICK_PLAYER_FOR_MURDER) && right_role?(GameStateHelper::Role::ASSASSIN)
+    ActionCable.server.broadcast(@room_name, GameStateHelper::confirm_murder(@game))
   end
 
   private
-  def have_permission?(state, role)
-    GameStateHelper::right_state?(@room_id, state) && GameStateHelper::right_role?(@room_id, @player_id, role)
+
+  def is_admin?
+    @game.admin_id == @player_id
   end
 
-  def have_admin_permission?(state)
-    GameStateHelper::right_state?(@room_id, state) && GameStateHelper::is_admin?(@room_id, @player_id)
+  def is_leader?
+    @game.leader_id == @player_id
   end
 
-  def have_lobby_leader_permission?(state)
-    GameStateHelper::right_state?(@room_id, state) && GameStateHelper::is_leader?(@room_id, @player_id)
+  def right_state?(state)
+    @game.state == state
+  end
+
+  def right_role?(*roles)
+    roles.include?(@game.player_roles[@player_id.to_s])
+  end
+
+  def self.is_here?
+    @game.players.include?(@player_id)
+  end
+
+
+  def game_exists?
+    if @game.nil?
+      ActionCable.server.broadcast(@room_name, {runtimeType: "gameDoesNotExists"})
+      stop_stream_from @room_name
+      return false
+    end
+    true
   end
 end
 

@@ -2,7 +2,9 @@ class PrivateChannel < ApplicationCable::Channel
 
   def subscribed
     @player_id = connection.current_user["id"]
-    @room_id = params[:room_id]
+    @game = GameState.find(params[:game])
+    return unless game_exists?
+
     stream_from "player_#{@player_id}"
   end
 
@@ -11,7 +13,7 @@ class PrivateChannel < ApplicationCable::Channel
   end
 
   def get_roles
-    ActionCable.server.broadcast("player_#{@player_id}", GameStateHelper::get_roles(@room_id, @player_id))
+    ActionCable.server.broadcast("player_#{@player_id}", GameStateHelper::get_roles(@game, @player_id))
   end
 
 end

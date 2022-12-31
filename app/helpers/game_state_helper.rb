@@ -44,8 +44,11 @@ module GameStateHelper
 
   def self.disconnect_player(game, player_id)
     game.online_players.delete(player_id)
+    if game.state == GameStateHelper::State::WAITING
+      return game.delete if game.online_players.empty?
+      game.admin_id = game.players.sample if game.admin_id == player_id
+    end
     game.save
-    game.online_players
   end
 
   def self.create_game(player_count, roles, creator_id)
@@ -71,6 +74,7 @@ module GameStateHelper
                                      end
     game.admin_id = creator_id
     game.leader_id = -1
+    # game.lol_id = -1
     game.save
 
     RemoveRoomJob.set(wait: 1.day).perform_later(game)
@@ -84,10 +88,10 @@ module GameStateHelper
     roles = game.roles
     game.player_roles = players.zip(roles.shuffle).to_h
     game.leader_id = game.players.sample
+    # game.lol_id = game.players[(game.players.index(game.leader_id) - 1) % game.players.size] if game.lol_enable
     game.state = GameStateHelper::State::PICK_CANDIDATES
     game.save
     game.to_h
-
   end
 
   def self.take_seat(game, player_id)
@@ -98,7 +102,6 @@ module GameStateHelper
 
   def self.free_up_seat(game, player_id)
     game.players.delete(player_id)
-    game.admin_id = game.players.sample if game.admin_id == player_id
     game.save
     game.to_h
   end

@@ -23,6 +23,12 @@ class GameState
 
   field :online_players, type: Array, default: []
 
+  # field :lol_enable, type: Boolean, default: false
+
+  # field :lol_id, type: Integer
+
+  # field :chat_enable, type: Boolean, default: false
+
   def to_h
     {
       runtimeType: self.state,
@@ -38,6 +44,9 @@ class GameState
       candidates: self.candidates,
       votesForResult: self.votes_for_result.values.shuffle,
       murderedId: self.murdered_id,
+      # lolEnable: self.lol_enable,
+      # lolId: self.lol_id,
+      # chatEnable: self.chat_enable
     }
   end
 end

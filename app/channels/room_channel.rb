@@ -15,7 +15,7 @@ class RoomChannel < ApplicationCable::Channel
 
   def unsubscribed
     stop_stream_from @private_stream_name
-    @game.delete if GameStateHelper::disconnect_player(@game, @player_id).empty? && right_state?(GameStateHelper::State::WAITING)
+    GameStateHelper::disconnect_player(@game, @player_id)
     stop_stream_from @room_name if @game.nil?
   end
 
@@ -96,14 +96,18 @@ class RoomChannel < ApplicationCable::Channel
     ActionCable.server.broadcast(@room_name, game_hash) unless right_state?(GameStateHelper::State::VOTE_FOR_RESULT)
   end
 
-  # def pick_player_for_lol(data) # the Lady of the Lake
-  #   return unless have_permission?(state: "выбор людей для вскрытия роли игроку с токеном Леди Лейк", user: @user)
-  #   ActionCable.server.broadcast(@room_name, GameStateHelper::pick_player_for_lol(data["player"]))
+  # def pick_player_for_lol(data)
+  #   return unless game_exists?
+  #
+  #   return unless is_here? && right_state?(GameStateHelper::State::PICK_PLAYER_FOR_MURDER) && has_lol_token?
+  #   ActionCable.server.broadcast(@room_name, GameStateHelper::pick_player_for_lol(@game, data["player"]))
   # end
   #
   # def confirm_lol
-  #   return unless have_permission?(state: "выбор людей для вскрытия роли игроку с токеном Леди Лейк", user: @user)
-  #   ActionCable.server.broadcast(@room_name, GameStateHelper::confirm_lol)
+  #   return unless game_exists?
+  #
+  #   return unless is_here? && right_state?(GameStateHelper::State::PICK_PLAYER_FOR_MURDER) && has_lol_token?
+  #   ActionCable.server.broadcast(@room_name, GameStateHelper::confirm_lol(@game))
   # end
 
   def pick_player_for_murder(data)
@@ -111,12 +115,6 @@ class RoomChannel < ApplicationCable::Channel
 
     return unless is_here? && right_state?(GameStateHelper::State::PICK_PLAYER_FOR_MURDER) && right_role?(GameStateHelper::Role::ASSASSIN)
     ActionCable.server.broadcast(@room_name, GameStateHelper::pick_player_for_murder(@game, data["player"]))
-  end
-  def unpick_player_for_murder(data)
-    return unless game_exists?
-
-    return unless is_here? && right_state?(GameStateHelper::State::PICK_PLAYER_FOR_MURDER) && right_role?(GameStateHelper::Role::ASSASSIN)
-    ActionCable.server.broadcast(@room_name, GameStateHelper::unpick_player_for_murder(@game, data["player"]))
   end
 
   def confirm_murder
@@ -144,10 +142,13 @@ class RoomChannel < ApplicationCable::Channel
     roles.include?(@game.player_roles[@player_id.to_s])
   end
 
-  def self.is_here?
+  def is_here?
     @game.players.include?(@player_id)
   end
 
+  # def has_lol_token?
+  #   @game.lol_id == @player_id
+  # end
 
   def game_exists?
     if @game.nil?
@@ -172,6 +173,5 @@ ws://localhost:3000/cable
   "command": "message",
   "data": "{\"action\":\"test\",\"body\":\"hello!\"}"
 }
-
 =end
 
